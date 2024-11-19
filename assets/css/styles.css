@@ -1,0 +1,171 @@
+/* General Body Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f4f7;
+    color: #333;
+}
+
+/* Container for three sections */
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #1a73e8;
+    padding: 20px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin: 20px 0;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.sidebar ul li a:hover {
+    color: #ffdb4d;
+}
+
+/* Main Content */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: #ffffff;
+}
+
+/* Welcome Header */
+.header {
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.header h1 {
+    font-size: 28px;
+    color: #333;
+}
+
+/* Middle Section (Current Sport and Interests) */
+.middle-content {
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.middle-content h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.middle-content h3 {
+    font-size: 20px;
+}
+
+.middle-content p {
+    font-size: 18px;
+    color: #666;
+}
+
+/* Right Content */
+.right-content {
+    width: 300px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Section */
+.profile-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+.rating-comments {
+    font-size: 16px;
+}
+
+.rating-comments h3 {
+    margin-bottom: 5px;
+    color: #1a73e8;
+}
+
+/* Scrollable Section for the Graph */
+.scrollable-section {
+    overflow-y: auto;
+    max-height: 400px; /* You can adjust this height */
+    padding-top: 10px;
+}
+
+/* Progress Chart */
+.progress-chart {
+    margin-top: 20px;
+}
+
+canvas {
+    width: 100% !important;
+    max-width: 500px;
+    height: auto !important;
+}
+/* Circular profile picture */
+.profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+/* Edit button */
+#editProfilePicBtn {
+    padding: 8px 16px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+#editProfilePicBtn:hover {
+    background-color: #155cb0;
+}
+
+/* Hide the file input field */
+#profilePicInput {
+    display: none;
+}

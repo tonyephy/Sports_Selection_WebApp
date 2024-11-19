@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* Container for the table */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .table-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 1000px;
+        }
+
+        h1, .subtitle {
+            text-align: center;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+            word-wrap: break-word; /* Ensures long text wraps correctly */
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        table td {
+            min-width: 150px; /* Ensures there is enough space for the data */
+            max-width: 300px; /* Avoids excessively wide columns */
+            word-wrap: break-word;
+        }
+
+        /* Button Styling */
+        .btn-primary {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+    <!-- Firebase CDN for Firestore -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDOQVvJ3jIN1a7hNxSko4WPPw8EYB1b0M",
+            authDomain: "sports-selection-18948.firebaseapp.com",
+            projectId: "sports-selection-18948",
+            storageBucket: "sports-selection-18948.appspot.com",
+            messagingSenderId: "339862998532",
+            appId: "1:339862998532:web:e50f88e8709d22d9a0af51",
+            measurementId: "G-HD6G578XCY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Retrieve and display user details by UID from local storage
+        async function fetchUserDetails() {
+            const uid = localStorage.getItem("userUID"); // Fetching UID from localStorage
+
+            if (!uid) {
+                alert("User ID not found. Please make sure you are logged in.");
+                return;
+            }
+
+            try {
+                // Fetch user details from Firestore using the UID
+                const docRef = doc(db, "users_details", uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const userDetails = docSnap.data();
+                    document.getElementById("name").textContent = userDetails.name;
+                    document.getElementById("age").textContent = userDetails.age;
+                    document.getElementById("address").textContent = userDetails.address;
+                    document.getElementById("mobile").textContent = userDetails.mobile;
+                    document.getElementById("gender").textContent = userDetails.gender;
+                } else {
+                    alert("No user details found.");
+                }
+            } catch (error) {
+                console.error("Error fetching user details:", error.message);
+                alert("Error fetching user details.");
+            }
+        }
+
+        // Edit button functionality (redirect to the edit form)
+        function editDetails() {
+            window.location.href = 'edit-details.html'; // Redirect to the edit form page
+        }
+
+        // Attach event listeners
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchUserDetails(); // Fetch and display user details on page load
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="table-container">
+            <h1>User Details</h1>
+            <p class="subtitle">Your information is displayed below:</p>
+
+            <table>
+                <tr>
+                    <th>Full Name</th>
+                    <td id="name">Loading...</td>
+                </tr>
+                <tr>
+                    <th>Age</th>
+                    <td id="age">Loading...</td>
+                </tr>
+                <tr>
+                    <th>Address</th>
+                    <td id="address">Loading...</td>
+                </tr>
+                <tr>
+                    <th>Mobile Number</th>
+                    <td id="mobile">Loading...</td>
+                </tr>
+                <tr>
+                    <th>Gender</th>
+                    <td id="gender">Loading...</td>
+                </tr>
+            </table>
+
+            <button class="btn-primary" onclick="editDetails()">Edit Details</button>
+        </div>
+    </div>
+</body>
+</html>

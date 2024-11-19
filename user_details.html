@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* Container for form */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 1000px;
+        }
+
+        h1, .subtitle {
+            text-align: center;
+        }
+
+        /* Flexbox for horizontal layout of form fields */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* Flexbox to align fields horizontally */
+        .form-fields {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-fields .form-group {
+            flex: 1 1 45%; /* Each field will take up 45% of the space */
+        }
+
+        /* Radio buttons for gender */
+        .gender-options {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Success message styling */
+        #successMessage {
+            display: none;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Button Styling */
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+    <!-- Firebase CDN for authentication and Firestore -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDOQVvJ3jIN1a7hNxSko4WPPw8EYB1b0M",
+            authDomain: "sports-selection-18948.firebaseapp.com",
+            projectId: "sports-selection-18948",
+            storageBucket: "sports-selection-18948.appspot.com",
+            messagingSenderId: "339862998532",
+            appId: "1:339862998532:web:e50f88e8709d22d9a0af51",
+            measurementId: "G-HD6G578XCY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Generate a unique user ID (for demonstration purposes)
+        function generateUserId() {
+            return 'user_' + new Date().getTime(); // Using current timestamp as unique ID
+        }
+
+        // Retrieve user details from Firestore
+        async function getUserDetails() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Please sign in to continue.");
+                return;
+            }
+            const docRef = doc(db, "users_details", user.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const userDetails = docSnap.data();
+                document.getElementById("name").value = userDetails.name || '';
+                document.getElementById("age").value = userDetails.age || '';
+                document.getElementById("address").value = userDetails.address || '';
+                document.getElementById("mobile").value = userDetails.mobile || '';
+                const gender = userDetails.gender;
+                if (gender) {
+                    document.querySelector(`input[name="gender"][value="${gender}"]`).checked = true;
+                }
+            } else {
+                alert("No user details found.");
+            }
+        }
+
+        // Save user details to Firestore and store user ID in localStorage
+        async function saveUserDetails(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const age = document.getElementById("age").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const mobile = document.getElementById("mobile").value.trim();
+            const gender = document.querySelector('input[name="gender"]:checked')?.value;
+
+            // Validate input fields
+            if (!name || !age || !address || !mobile || !gender) {
+                alert('Please fill out all fields.');
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    alert('User not authenticated');
+                    return;
+                }
+
+                // Generate user ID (if not already stored)
+                const userId = localStorage.getItem('userId') || generateUserId();
+                localStorage.setItem('userId', userId); // Store user ID in localStorage
+
+                // Save user details to Firestore
+                await setDoc(doc(db, "users_details", user.uid), {
+                    name: name,
+                    age: age,
+                    address: address,
+                    mobile: mobile,
+                    gender: gender,
+                    userId: userId // Store the user ID in Firestore
+                });
+
+                console.log('User details saved:', { name, age, address, mobile, gender });
+
+                // Display success message
+                document.getElementById("successMessage").style.display = "block";
+                
+                // Redirect to dashboard after a brief delay
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html'; // Redirect to dashboard
+                }, 2000); // 2 seconds delay
+            } catch (error) {
+                console.error('Error saving user details:', error.message);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Attach event listeners
+        document.addEventListener("DOMContentLoaded", () => {
+            const userDetailsForm = document.querySelector("form");
+            userDetailsForm.addEventListener("submit", saveUserDetails);
+            getUserDetails(); // Load user details when the form is loaded
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container user-details">
+            <form action="#" id="userDetailsForm">
+                <h1>User Details</h1>
+                <p class="subtitle">Please fill out your details</p>
+
+                <div class="form-fields">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" placeholder="Enter your age" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" placeholder="Enter your address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mobile">Mobile Number</label>
+                        <input type="tel" id="mobile" placeholder="Enter your mobile number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Gender</label>
+                    <div class="gender-options">
+                        <input type="radio" id="male" name="gender" value="Male">
+                        <label for="male">Male</label>
+                        <input type="radio" id="female" name="gender" value="Female">
+                        <label for="female">Female</label>
+                        <input type="radio" id="other" name="gender" value="Other">
+                        <label for="other">Other</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Save and Continue</button>
+            </form>
+
+            <!-- Success message displayed after data is saved -->
+            <div id="successMessage" style="display: none; padding: 10px; background-color: #4CAF50; color: white; text-align: center; margin-top: 20px;">
+                Your details have been saved successfully!
+            </div>
+        </div>
+    </div>
+</body>
+</html>

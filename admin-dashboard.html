@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Admin Dashboard - Sports Selection System</title>
+    <style>
+        /* Your existing styles */
+        body { font-family: Arial, sans-serif; }
+        h1 { text-align: center; margin: 20px 0; }
+        .admin-container { display: flex; justify-content: space-between; padding: 20px; }
+        .left-section, .right-section { padding: 20px; border: 1px solid #ccc; width: 45%; }
+        .left-section h2, .right-section h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f4f4f4; }
+        #feedbackMessage { margin-top: 10px; color: green; }
+        button { margin-top: 10px; padding: 10px; background-color: #007BFF; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .decision-buttons { margin-top: 10px; }
+        .decision-buttons button { margin-right: 5px; }
+        .comment-box { margin-top: 10px; display: none; }
+        .comment-box textarea { width: 100%; height: 50px; margin-top: 5px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+
+    <div class="admin-container">
+        <!-- Left Section: Rate and Comment -->
+        <div class="left-section">
+            <h2>Rate and Comment on Students</h2>
+            <form id="ratingForm">
+                <label for="student">Select Student:</label>
+                <select id="student"></select>
+                <label for="rating">Rating (out of 5):</label>
+                <input type="number" id="rating" min="1" max="5" required>
+                <label for="comment">Comment:</label>
+                <textarea id="comment" required></textarea>
+                <button type="submit">Submit</button>
+            </form>
+            <p id="feedbackMessage"></p>
+        </div>
+
+        <!-- Right Section: View Registered Students and Sport Requests -->
+        <div class="right-section">
+            <h2>Registered Students</h2>
+            <button id="showStudentsBtn">View Registered Students</button>
+            <div id="studentDetailsSection" style="display: none;">
+                <table id="studentDetailsTable">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Phone</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Disabilities</th>
+                            <th>Interests</th>
+                            <th>Sport</th>
+                            <th>Achievements</th>
+                            <th>Documents</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <h2>Team or Fun Requests</h2>
+            <div id="studentRequestsSection" style="display: none;">
+                <table id="studentRequestsTable">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Sport</th>
+                            <th>Reason</th>
+                            <th>Choice</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/dashboard.js"></script>
+    <script>
+        // Fetch and load student list from MongoDB on button click
+        document.getElementById('showStudentsBtn').addEventListener('click', async function() {
+            const studentDetailsSection = document.getElementById('studentDetailsSection');
+            const studentDetailsTable = document.getElementById('studentDetailsTable').querySelector('tbody');
+            studentDetailsTable.innerHTML = ''; // Clear previous entries
+
+            try {
+                const response = await fetch('/api/students'); // Adjust to your MongoDB route
+                const students = await response.json();
+
+                students.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.username}</td>
+                        <td>${student.phone || 'N/A'}</td>
+                        <td>${student.age || 'N/A'}</td>
+                        <td>${student.gender || 'N/A'}</td>
+                        <td>${student.disabilities || 'None'}</td>
+                        <td>${student.interests.join(', ') || 'None'}</td>
+                        <td>${student.selectedSport || 'None'}</td>
+                        <td>${student.achievements || 'None'}</td>
+                        <td>${student.docs ? `<a href="${student.docs}" target="_blank">View</a>` : 'None'}</td>
+                    `;
+                    studentDetailsTable.appendChild(row);
+                });
+
+                studentDetailsSection.style.display = 'block';
+            } catch (error) {
+                console.error('Error fetching student data:', error);
+            }
+        });
+
+        // Form submission logic for rating and comments with MongoDB
+        document.getElementById('ratingForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const selectedStudent = document.getElementById('student').value;
+            const rating = document.getElementById('rating').value;
+            const comment = document.getElementById('comment').value;
+
+            try {
+                const response = await fetch(`/api/students/${selectedStudent}/rate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating, comment })
+                });
+                if (response.ok) {
+                    document.getElementById('feedbackMessage').textContent = `Rating and comment for ${selectedStudent} saved successfully!`;
+                } else {
+                    console.error('Failed to submit rating.');
+                }
+            } catch (error) {
+                console.error('Error submitting rating:', error);
+            }
+        });
+
+        // Display requests with acceptance/rejection and comments
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/api/requests'); // Adjust to your MongoDB route
+                const requests = await response.json();
+
+                const tableBody = document.getElementById('studentRequestsTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+
+                requests.forEach(request => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${request.username}</td>
+                        <td>${request.sport}</td>
+                        <td>${request.reason}</td>
+                        <td>${request.choice}</td>
+                        <td class="decision-buttons">
+                            <button class="accept-btn" data-username="${request.username}">Accept</button>
+                            <button class="deny-btn" data-username="${request.username}">Deny</button>
+                            <div class="comment-box" id="comment-box-${request.username}">
+                                <label for="admin-comment-${request.username}">Admin Comment:</label>
+                                <textarea id="admin-comment-${request.username}" placeholder="Enter your comment..."></textarea>
+                                <button onclick="saveComment('${request.username}')">Save Comment</button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                document.getElementById('studentRequestsSection').style.display = 'block';
+
+                document.querySelectorAll('.accept-btn, .deny-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const username = this.getAttribute('data-username');
+                        document.getElementById(`comment-box-${username}`).style.display = 'block';
+                        alert(`${this.textContent} request for ${username}.`);
+                    });
+                });
+            } catch (error) {
+                console.error('Error fetching requests:', error);
+            }
+        });
+
+        async function saveComment(username) {
+            const comment = document.getElementById(`admin-comment-${username}`).value;
+            try {
+                const response = await fetch(`/api/requests/${username}/comment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment })
+                });
+                if (response.ok) {
+                    alert(`Comment for ${username} saved.`);
+                } else {
+                    console.error('Failed to save comment.');
+                }
+            } catch (error) {
+                console.error('Error saving comment:', error);
+            }
+        }
+    </script>
+</body>
+</html>

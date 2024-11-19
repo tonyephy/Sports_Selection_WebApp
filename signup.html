@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Firebase CDN for authentication -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDOQVvJ3jIN1a7hNxSko4WPPw8EYB1b0M",
+            authDomain: "sports-selection-18948.firebaseapp.com",
+            projectId: "sports-selection-18948",
+            storageBucket: "sports-selection-18948.firebasestorage.app",
+            messagingSenderId: "339862998532",
+            appId: "1:339862998532:web:e50f88e8709d22d9a0af51",
+            measurementId: "G-HD6G578XCY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Sign-up function
+        async function signUpUser(event) {
+            event.preventDefault();  // Prevent default form submission
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            try {
+                // Check if the email is already registered
+                const methods = await fetchSignInMethodsForEmail(auth, email);
+                if (methods.length > 0) {
+                    alert("Email already exists. Please login.");
+                    return;
+                }
+
+                // Create the user account
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                console.log('User signed up:', user);
+
+                // Redirect to interests-selection.html after successful sign-up
+                window.location.href = 'interests-selection.html';  // Redirect to interests-selection page
+            } catch (error) {
+                console.error('Error signing up:', error.message);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Attach the sign-up function to the form
+        document.addEventListener("DOMContentLoaded", () => {
+            const signUpForm = document.querySelector("form");
+            signUpForm.addEventListener("submit", signUpUser);
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container sign-up">
+            <form action="#">
+                <h1>Create Account</h1>
+                <p class="subtitle">Create an account to get started</p>
+
+                <div class="name-group">
+                    <div class="form-group">
+                        <label for="firstname">First Name</label>
+                        <input type="text" id="firstname" placeholder="First name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastname">Last Name</label>
+                        <input type="text" id="lastname" placeholder="Last name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Create a password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+                </div>
+
+                <button type="submit" class="btn-primary">Create Account</button>
+                
+                <button type="button" class="btn-google">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
+                    Sign up with Google
+                </button>
+
+                <p class="signup-link">
+                    Already have an account? <a href="signin.html">Sign in</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

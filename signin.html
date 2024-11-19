@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Firebase CDN for authentication -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDOQVvJ3jIN1a7hNxSko4WPPw8EYB1b0M",
+            authDomain: "sports-selection-18948.firebaseapp.com",
+            projectId: "sports-selection-18948",
+            storageBucket: "sports-selection-18948.appspot.com",
+            messagingSenderId: "339862998532",
+            appId: "1:339862998532:web:e50f88e8709d22d9a0af51",
+            measurementId: "G-HD6G578XCY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Sign-in with email and password
+        async function signInUser(event) {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            // Validate that both fields are filled
+            if (!email || !password) {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            try {
+                // Firebase authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('User signed in:', userCredential.user);
+                window.location.href = 'dashboard.html'; // Redirect to dashboard
+            } catch (error) {
+                console.error('Error signing in:', error.message);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Send password reset email
+        async function resetPassword(event) {
+            event.preventDefault();
+
+            const email = prompt("Enter your email address to receive the password reset link:");
+
+            if (!email) {
+                alert("Please enter a valid email.");
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert('Password reset email sent! Please check your inbox.');
+            } catch (error) {
+                console.error('Error sending password reset email:', error.message);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Attach event listeners
+        document.addEventListener("DOMContentLoaded", () => {
+            const signInForm = document.querySelector("#signInForm");  // Ensure correct form selector
+            const resetPasswordLink = document.querySelector(".forgot");
+
+            signInForm.addEventListener("submit", signInUser); // Handle sign-in form submission
+            resetPasswordLink.addEventListener("click", resetPassword); // Handle password reset
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container sign-in">
+            <form action="#" id="signInForm">
+                <h1>Sign In</h1>
+                <p class="subtitle">Welcome back! Please enter your details</p>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+
+                <div class="options">
+                    <div class="remember">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-primary">Sign In</button>
+                
+                <p class="signup-link">
+                    Don't have an account? <a href="signup.html">Sign up</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

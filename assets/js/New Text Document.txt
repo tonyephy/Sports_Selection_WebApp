@@ -1,0 +1,7 @@
+bottom of the sport selection team an attrative quostion asking if your'e choosing the sport 
+just for fun or want to join the school team if yes a simple, description why.
+
+so there should e a button on the admins dasboard showing what students are choosing a sport for, (fun and for shcool team)
+, the coach should accept or deny , and the message should be visible in the studends dashborad 
+if accepted a conglatulation and dont miss your exrecise  if denied by admin a message saying better luck and dont miss your exrecises.
+ LET ME SEND SPORT SELECTION PAGE AND BOTH DASHBOARDS FOR UPDATES

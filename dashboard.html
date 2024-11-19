@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Sports Selection Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
+        .container { display: flex; justify-content: space-between; padding: 20px; }
+        .sidebar, .main-content, .right-content { padding: 15px; border-radius: 10px; }
+        .main-content { width: 55%; background-color: #ffffff; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .right-content { width: 20%; }
+        .rating-comments, .admin-comment-section { background-color: #ffffff; padding: 15px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .profile-pic { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }
+        button, input[type="file"] { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <ul>
+                <li><a href="interests-selection.html" id="changeInterestsBtn">Change Interest</a></li>
+                <li><a href="sport-selection.html" id="changeSportBtn">Change Sport</a></li>
+                <li><a href="fetch_user_detail.html" id="accountDetailsBtn">Your Details</a></li>
+                <li><button id="logoutBtn">Logout</button></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="welcomeMessage">Welcome, [Username]</h1>
+            </div>
+            <div class="middle-content">
+                <h2>Current Sport: <span id="currentSport">Football</span></h2>
+                <h3>Your Interests</h3>
+                <ul id="interestsList">
+                    <!-- Interests will be loaded here dynamically -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Content -->
+        <div class="right-content">
+            <div class="profile-section">
+                <img src="img/default-profile.jpg" alt="Profile Picture" class="profile-pic" id="profilePic">
+                <button id="editProfilePicBtn">Edit Profile Picture</button>
+                <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+            </div>
+            <!-- Coach's Rating Section -->
+            <div class="rating-comments">
+                <h2>Coach's Rating: <span id="coachRating">4.5/5</span></h2>
+                <p id="coachComments">Comments: "Great improvement!"</p>
+            </div>
+            <!-- Admin Comment Section -->
+            <div class="admin-comment-section">
+                <h2>Admin's Comment</h2>
+                <p id="adminComment">Awaiting feedback...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDOQVvJ3jIN1a7hNxSko4WPPw8EYB1b0M",
+            authDomain: "sports-selection-18948.firebaseapp.com",
+            projectId: "sports-selection-18948",
+            storageBucket: "sports-selection-18948.appspot.com",
+            messagingSenderId: "339862998532",
+            appId: "1:339862998532:web:e50f88e8709d22d9a0af51",
+            measurementId: "G-HD6G578XCY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Fetch user ID from localStorage
+        const userId = localStorage.getItem("userId");
+
+        if (userId) {
+            const userRef = doc(db, "users", userId);
+
+            getDoc(userRef)
+                .then(docSnap => {
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        
+                        // Update the welcome message with user's name
+                        document.getElementById("welcomeMessage").textContent = `Welcome, ${userData.fullName}`;
+                        
+                        // Update current sport
+                        document.getElementById("currentSport").textContent = userData.sport || "Not selected";
+                        
+                        // Populate interests
+                        const interestsList = document.getElementById("interestsList");
+                        userData.interests.forEach(interest => {
+                            const listItem = document.createElement("li");
+                            listItem.textContent = interest;
+                            interestsList.appendChild(listItem);
+                        });
+
+                        // Set profile picture
+                        if (userData.profilePic) {
+                            document.getElementById("profilePic").src = userData.profilePic;
+                        }
+
+                        // Set coach's rating and comments
+                        document.getElementById("coachRating").textContent = userData.coachRating || "Not rated";
+                        document.getElementById("coachComments").textContent = userData.coachComments || "No comments available";
+
+                        // Set admin comment
+                        document.getElementById("adminComment").textContent = userData.adminComment || "Awaiting feedback...";
+                    } else {
+                        console.log("No user data found!");
+                    }
+                })
+                .catch(error => {
+                    console.log("Error getting document:", error);
+                });
+        } else {
+            console.log("No user ID found in localStorage.");
+        }
+
+        // Edit profile picture
+        document.getElementById('editProfilePicBtn').addEventListener('click', function() {
+            document.getElementById('profilePicInput').click();
+        });
+
+        document.getElementById('profilePicInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profilePic').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem("userId"); // Remove user ID from localStorage
+            alert("Logged out successfully!");
+            window.location.href = 'index.html'; // Redirect to sign-in page
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Select Interests</title>
+    <style>
+        /* (Your existing styles) */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .interest-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            margin: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .school-container, .achievement-container, .interest-example, .custom-interest-container {
+            margin-top: 20px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+        select, textarea, input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0f56b3;
+        }
+        .add-interest-btn {
+            background-color: #4CAF50;
+            margin-top: 10px;
+        }
+        .add-interest-btn:hover {
+            background-color: #3e8e41;
+        }
+    </style>
+</head>
+<body>
+    <div class="interest-container">
+        <h1>Select Your Interests</h1>
+        <form id="interestForm">
+            <!-- School/Department Selection -->
+            <div class="school-container">
+                <label for="school">School/Department:</label>
+                <select id="school" required>
+                    <option value="">Choose School/Department</option>
+                    <option value="School of Business and Economics">School of Business and Economics</option>
+                    <option value="School of Education">School of Education</option>
+                    <option value="School of Law">School of Law</option>
+                    <option value="School of Medicine and Health Sciences">School of Medicine and Health Sciences</option>
+                    <option value="School of Music and Performing Arts">School of Music and Performing Arts</option>
+                    <option value="School of Pharmacy">School of Pharmacy</option>
+                    <option value="School of Science, Engineering and Technology">School of Science, Engineering and Technology</option>
+                </select>
+            </div>
+
+            <!-- Add Other Interest Section -->
+            <div class="custom-interest-container">
+                <button type="button" class="add-interest-btn" id="addOtherInterestBtn">Add Other Interest</button>
+                <div id="otherInterestInput" style="display: none;">
+                    <label for="customInterest">Specify Your Interest:</label>
+                    <input type="text" id="customInterest" placeholder="Enter your interest here" />
+                    <textarea id="customInterestDesc" placeholder="Describe your interest or experience"></textarea>
+                </div>
+            </div>
+
+            <!-- Achievements Section -->
+            <div class="achievement-container">
+                <label for="achievements">Achievements related to your interests:</label>
+                <textarea id="achievements" placeholder="Describe achievements (e.g., competitions, awards)"></textarea>
+            </div>
+
+            <!-- Example Interest Section -->
+            <div class="interest-example">
+                <label for="interestExample">Example Interest:</label>
+                <p>Basketball - Passionate about sports? Select Basketball and explore school team options or just enjoy playing for fun!</p>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit">Next</button>
+        </form>
+    </div>
+
+    <script type="module">
+        // Firebase configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDOQVvJ3jIN1a7hNxSko4WPPw8EYB1b0M",
+            authDomain: "sports-selection-18948.firebaseapp.com",
+            projectId: "sports-selection-18948",
+            storageBucket: "sports-selection-18948.firebasestorage.app",
+            messagingSenderId: "339862998532",
+            appId: "1:339862998532:web:e50f88e8709d22d9a0af51",
+            measurementId: "G-HD6G578XCY"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+    
+        // Handle form submission
+        document.getElementById('interestForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+    
+            const user = auth.currentUser;
+            if (!user) {
+                alert('You must be signed in to submit interests.');
+                return;
+            }
+    
+            const school = document.getElementById('school').value;
+            const achievements = document.getElementById('achievements').value;
+            const customInterest = document.getElementById('customInterest').value;
+            const customInterestDesc = document.getElementById('customInterestDesc').value;
+    
+            try {
+                // Add the data to Firestore under the 'sports' collection
+                await addDoc(collection(db, "interest_selections"), {
+                    userId: user.uid,
+                    school,
+                    achievements,
+                    customInterest,
+                    customInterestDesc,
+                    timestamp: new Date()
+                });
+    
+                // Notify the user that the interests were saved
+                alert('Your interests have been saved successfully!');
+    
+                // Redirect after the notification
+                window.location.href = 'sport-selection.html';
+            } catch (error) {
+                console.error('Error saving interests:', error);
+                alert('An error occurred while saving your interests. Please try again.');
+            }
+        });
+    
+        // Toggle the input for custom interest
+        document.getElementById('addOtherInterestBtn').addEventListener('click', function() {
+            const otherInterestInput = document.getElementById('otherInterestInput');
+            otherInterestInput.style.display = otherInterestInput.style.display === 'none' ? 'block' : 'none';
+        });
+    </script>
+    
+</body>
+</html>
